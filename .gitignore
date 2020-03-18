@@ -24,10 +24,17 @@ hs_err_pid*
 
 # corpora
 corpora.7z
-corpora/
+corpora
+
+# OSX files
+.DS_Store
 
 # build files & project config files
 InfoSeekers.jar
 .idea/
 *.iml
 target/
+.settings/
+.classpath
+.project
+
