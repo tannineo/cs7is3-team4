@@ -25,3 +25,9 @@ hs_err_pid*
 # corpora
 corpora.7z
 corpora/
+
+# build files & project config files
+InfoSeekers.jar
+.idea/
+*.iml
+target/
