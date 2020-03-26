@@ -20,7 +20,55 @@ Run the compiled `InfoSeekers.jar` file.
 $ java -jar InfoSeekers.jar
 ```
 
-## Design
+## Implemetation
+
+### Parsing
+
+Using external tools:
+
+- `osx` from OpenSP: An SGML System Conforming to International Standard ISO 8879 -- Standard Generalized Markup Language
+  - http://openjade.sourceforge.net/doc/index.htm
+- `hay/xml2json`: Python script converts XML to JSON or the other way around
+  - https://github.com/hay/xml2json
+  - with default python (2.7)
+
+Steps:
+
+1. `sh awk_split.sh` to copy and split files (1 file 1 DOC, it will generate many files end with `.split`)
+2. `sh sgm2json.sh` to transform `.split` files into `.json` files
+3. load `*.json` files to index
+
+#### Troubleshooting
+
+Entities: `amp`, `sect`, `hyph`, etc....
+
+Mainly happens in `fr94`, TODO
+
+---
+
+`/bin/rm: cannot execute [Argument list too long]` when cleaning the generated files, solution:
+
+```text
+$ find ./corpora -name "*.sgmn*" -print0 | xargs -0 rm
+
+Or use clean.sh
+```
+
+Too many files to cp/mv:
+
+```text
+$ find ../corpora/fbis -name "*.json" -exec cp -- "{}" ./fbis/ \;
+```
+
+---
+
+One special file: `./corpora/fr94/fr940328_2.sgm` will cause `awk_split.sh` to throw an error.
+
+Delete the first line of this file to make sure the file starts with `<DOC>`
+
+### Indexing
+
+### Querying
 
 ## About
 

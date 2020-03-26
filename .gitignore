@@ -38,3 +38,11 @@ target/
 .classpath
 .project
 
+# test folder
+test/
+
+# generated files
+generated_json/
+
+# node modules
+node_modules/
