@@ -7,14 +7,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class QueryParser {
     public ArrayList<DocumentQuery> readQueries(String queryFilePath) {
         ArrayList<DocumentQuery> QueryArray = new ArrayList<>();
         try {
-            File file = new File(Paths.get(queryFilePath).toString());
+            File file = new File(queryFilePath);
             Document doc = Jsoup.parse(file, "UTF-8");
             Elements elements = doc.getElementsByTag("top");
             for (Element el : elements) {

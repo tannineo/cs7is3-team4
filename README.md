@@ -44,6 +44,10 @@ Entities: `amp`, `sect`, `hyph`, etc....
 
 Mainly happens in `fr94`, TODO
 
+And also `&hyph;` is not a standard entity (should be `&hyphen;` or `&dash;`, see [charref from w3c](https://dev.w3.org/html5/html-author/charref)).
+
+We may need our own parser to parse entities.
+
 ---
 
 `/bin/rm: cannot execute [Argument list too long]` when cleaning the generated files, solution:
