@@ -43,6 +43,7 @@ test/
 
 # generated files
 generated_json/
+generated_index/
 
 # node modules
 node_modules/

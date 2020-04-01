@@ -4,13 +4,22 @@ import life.tannineo.cs7is3.group4.parser.FbisParser;
 import life.tannineo.cs7is3.group4.parser.Fr94Parser;
 import life.tannineo.cs7is3.group4.parser.FtParser;
 import life.tannineo.cs7is3.group4.parser.LatimesParser;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class App {
+
+    static String INDEX_PATH = "generated_index";
 
     private static String[] corporaName = {"fbis", "fr94", "ft", "latimes"};
 
@@ -70,6 +79,24 @@ public class App {
         // endregion
 
         // region 2. indexing
+
+        // TODO: replace the analyzer & similarity with custom one!
+        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer();
+        BM25Similarity bm25Similarity = new BM25Similarity();
+
+        IndexWriterConfig iwconfig = new IndexWriterConfig(englishAnalyzer);
+        iwconfig.setSimilarity(bm25Similarity);
+        Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
+        iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times
+        IndexWriter indexWriter = new IndexWriter(indexDir, iwconfig);
+
+        // add document to the index
+        indexWriter.addDocuments(documents);
+
+        indexWriter.close();
+        indexDir.close(); // close index before next use
+
+        System.out.println("Indexed all documents... index files generated in generated_index/");
 
         // endregion
 

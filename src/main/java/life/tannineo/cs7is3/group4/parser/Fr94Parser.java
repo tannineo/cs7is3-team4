@@ -51,6 +51,12 @@ public class Fr94Parser implements DocumentParser<DocumentFr94> {
                     elPARENT.get(0).text("");
                 }
 
+                Elements elDOCTITLE = el.getElementsByTag("DOCTITLE");
+                if (elDOCTITLE.size() > 0) {
+                    docFr94.docTitle = WeirdEntityParser.parse(Entities.unescape(elDOCTITLE.get(0).text().trim()));
+                    elDOCTITLE.get(0).text("");
+                }
+
                 // finally the rest things goes into meta
 
                 docFr94.meta = WeirdEntityParser.parse(Entities.unescape(el.text().trim()));
@@ -85,6 +91,10 @@ public class Fr94Parser implements DocumentParser<DocumentFr94> {
 
             if (!Objects.isNull(doc.parent)) {
                 parsedDoc.add(new StringField("PARENT", doc.parent, Field.Store.YES));
+            }
+
+            if (!Objects.isNull(doc.docTitle)) {
+                parsedDoc.add(new TextField("HEADLINE", doc.docTitle, Field.Store.YES)); // DOCTITLE
             }
 
             parsedArr.add(parsedDoc);
