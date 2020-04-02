@@ -72,7 +72,7 @@ public class App {
             }
         }
 
-        File LatimesFolder = new File("../corpora/fbis");
+        File LatimesFolder = new File("../corpora/latimes");
         LatimesParser latimesParser = new LatimesParser();
         for (File sgm : Objects.requireNonNull(LatimesFolder.listFiles())) {
             if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
@@ -115,7 +115,7 @@ public class App {
 //            System.out.println(documentQuery.narrative);
 //        }
         LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
-        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser((String[]) FieldName.getAllNames().toArray(), englishAnalyzer);
+        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNames(), englishAnalyzer);
         multiFieldQueryParser.setAllowLeadingWildcard(true);
         for (DocumentQuery dq : documentQueries) {
             Query qry = multiFieldQueryParser.parse(dq.title + " " + dq.description + " " + dq.narrative);
@@ -139,7 +139,7 @@ public class App {
 
             for (ScoreDoc hit : topHits) {
                 Document doc = searcher.doc(hit.doc);
-                String result = queryEntry.getKey() + " 0 " + doc.get(FieldName.DOCNO.getName()) + " 0 ";
+                String result = queryEntry.getKey() + " 0 " + doc.get(FieldName.DOCNO.getName()) + " 0 " + hit.score + " STANDARD";
                 System.out.println(result);
                 // add the result
                 resultArr.add(result);

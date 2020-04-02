@@ -1,7 +1,5 @@
 package life.tannineo.cs7is3.group4;
 
-import java.util.ArrayList;
-
 public enum FieldName {
 
     DOCNO("DOCNO"),
@@ -34,10 +32,12 @@ public enum FieldName {
         return name;
     }
 
-    public static ArrayList<String> getAllNames() {
-        ArrayList<String> arr = new ArrayList<>();
-        for (FieldName fn : FieldName.values()) {
-            arr.add(fn.getName());
+    public static String[] getAllNames() {
+        FieldName[] allFieldNames = FieldName.values();
+        int size = allFieldNames.length;
+        String[] arr = new String[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = allFieldNames[i].name;
         }
         return arr;
     }
