@@ -1,31 +1,38 @@
 package life.tannineo.cs7is3.group4;
 
-import life.tannineo.cs7is3.group4.parser.FbisParser;
-import life.tannineo.cs7is3.group4.parser.Fr94Parser;
-import life.tannineo.cs7is3.group4.parser.FtParser;
-import life.tannineo.cs7is3.group4.parser.LatimesParser;
+import life.tannineo.cs7is3.group4.entity.DocumentQuery;
+import life.tannineo.cs7is3.group4.parser.*;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.*;
 
 public class App {
 
     static String INDEX_PATH = "generated_index";
+    static int HITS_PER_PAGE = 1000;
 
     private static String[] corporaName = {"fbis", "fr94", "ft", "latimes"};
 
     public static void main(String args[]) throws Exception {
 
-        // region 1. parse corpora
+        // region 1. corpora parsing
 
 //        FbisParser fbisParser = new FbisParser();
 //        fbisParser.readFile("../corpora/fbis/fb396001.sgm");
@@ -87,7 +94,7 @@ public class App {
         IndexWriterConfig iwconfig = new IndexWriterConfig(englishAnalyzer);
         iwconfig.setSimilarity(bm25Similarity);
         Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
-        iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times
+        iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times ???
         IndexWriter indexWriter = new IndexWriter(indexDir, iwconfig);
 
         // add document to the index
@@ -100,22 +107,52 @@ public class App {
 
         // endregion
 
-        // region 3. parse queries
-//        QueryParser queryParser = new QueryParser();
-//        ArrayList<DocumentQuery> documentQueries = queryParser.readQueries("topics");
+        // region 3. query parsing
+        ArrayList<DocumentQuery> documentQueries = new QueryParser().readQueries("topics");
 //        for (DocumentQuery documentQuery : documentQueries) {
-//            System.out.println(documentQuery.Title);
+//            System.out.println(documentQuery.title);
 //            System.out.println(documentQuery.description);
-//            System.out.println(documentQuery.Narrative);
+//            System.out.println(documentQuery.narrative);
 //        }
+        LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
+        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser((String[]) FieldName.getAllNames().toArray(), englishAnalyzer);
+        multiFieldQueryParser.setAllowLeadingWildcard(true);
+        for (DocumentQuery dq : documentQueries) {
+            Query qry = multiFieldQueryParser.parse(dq.title + " " + dq.description + " " + dq.narrative);
+            queryLinkedHashMap.put(dq.queryId, qry);
+        }
+
+        System.out.println("Parsed all queries... " + queryLinkedHashMap.entrySet().size() + " in total!");
         // endregion
 
         // region 4. search
+        Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
+        DirectoryReader dirReader = DirectoryReader.open(dirr);
+        IndexSearcher searcher = new IndexSearcher(dirReader);
+        searcher.setSimilarity(bm25Similarity);
 
+        ArrayList<String> resultArr = new ArrayList<>();
+
+        for (Map.Entry<String, Query> queryEntry : queryLinkedHashMap.entrySet()) {
+            TopDocs topDocs = searcher.search(queryEntry.getValue(), HITS_PER_PAGE);
+            ScoreDoc[] topHits = topDocs.scoreDocs;
+
+            for (ScoreDoc hit : topHits) {
+                Document doc = searcher.doc(hit.doc);
+                String result = queryEntry.getKey() + " 0 " + doc.get(FieldName.DOCNO.getName()) + " 0 ";
+                System.out.println(result);
+                // add the result
+                resultArr.add(result);
+            }
+        }
         // endregion
 
         // region 5. gen results
+        String filename = "search_result_" + new Date().getTime();
+        Path resultPath = Paths.get(filename);
+        Files.write(resultPath, resultArr, StandardCharsets.UTF_8);
 
+        System.out.println(filename + " complete!");
         // endregion
     }
 }
