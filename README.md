@@ -25,7 +25,7 @@ A jar called `InfoSeekers.jar` should appear at the root of the project folder.
 Run the compiled `InfoSeekers.jar` file.
 
 ```text
-$ java -jar InfoSeekers.jar
+$ java -jar -Xms4g -Xmx6g InfoSeekers.jar
 ```
 
 ## Implemetation
