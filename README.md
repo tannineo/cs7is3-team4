@@ -6,9 +6,17 @@ The group assignment of Team 4 for CS7IS3
 
 Download the renamed corpora from [issues/2#issuecomment-600780315](https://github.com/tannineo/cs7is3-team4/issues/2#issuecomment-600780315). Extract the corpora as the `corpora` folder.
 
+the folders should be organized like this:
+
+```text
+$ ls
+corpora        cs7is3-team4
+```
+
 Build the project using the script `compile.sh`.
 
 ```text
+$ cd cs7is3-team4
 $ sh compile.sh
 ```
 
@@ -23,6 +31,11 @@ $ java -jar InfoSeekers.jar
 ## Implemetation
 
 ### Parsing
+
+2 approaches to parse the corpora:
+
+- `jsoup`: to directly parse sgml (used in java code)
+- `sgml => xml => json`: the way is listed below (not recommended for high cost of time)
 
 Using external tools:
 
