@@ -2,6 +2,7 @@ package life.tannineo.cs7is3.group4;
 
 import life.tannineo.cs7is3.group4.entity.DocumentQuery;
 import life.tannineo.cs7is3.group4.parser.*;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -31,6 +32,16 @@ public class App {
     private static String[] corporaName = {"fbis", "fr94", "ft", "latimes"};
 
     public static void main(String args[]) throws Exception {
+
+        // region 0. prepare and test field
+        // TODO: replace the analyzer & similarity with custom one!
+        BM25Similarity bm25Similarity = new BM25Similarity();
+        CharArraySet customStopWordSet = new CharArraySet(127, true);
+        customStopWordSet.addAll(Arrays.asList(CustomWordSet.customStopWords));
+        CharArraySet cusromNotToStemSet = new CharArraySet(100, true);
+        cusromNotToStemSet.addAll(Arrays.asList(CustomWordSet.customWordsNotToStem));
+        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer(customStopWordSet, cusromNotToStemSet);
+        // endregion
 
         // region 1. corpora parsing
 
@@ -86,10 +97,6 @@ public class App {
         // endregion
 
         // region 2. indexing
-
-        // TODO: replace the analyzer & similarity with custom one!
-        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer();
-        BM25Similarity bm25Similarity = new BM25Similarity();
 
         IndexWriterConfig iwconfig = new IndexWriterConfig(englishAnalyzer);
         iwconfig.setSimilarity(bm25Similarity);
