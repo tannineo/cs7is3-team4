@@ -75,5 +75,6 @@ public class MyAnalyzer extends Analyzer {
 
         return new TokenStreamComponents(tokenizer, tokenStream);
     }
+
 }
 

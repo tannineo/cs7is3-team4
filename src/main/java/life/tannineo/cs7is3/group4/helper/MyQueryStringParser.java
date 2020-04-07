@@ -1,7 +1,7 @@
 package life.tannineo.cs7is3.group4.helper;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import java.io.StringReader;
@@ -12,9 +12,11 @@ import java.util.Set;
 
 public class MyQueryStringParser {
 
-    public static String parseQueryString(Analyzer analyzer, String keywords) throws Exception {
+    public static String parseQueryString(String keywords) throws Exception {
 
         List<String> result = new ArrayList<>();
+
+        StandardAnalyzer analyzer = new StandardAnalyzer();
 
         try {
             TokenStream stream = analyzer.tokenStream(null, new StringReader(keywords));
@@ -40,6 +42,8 @@ public class MyQueryStringParser {
         for (String str : keywordSet) {
             if (!str.equals("_")) resultString.append(str).append(" ");
         }
+
+
         return resultString.toString();
     }
 }
