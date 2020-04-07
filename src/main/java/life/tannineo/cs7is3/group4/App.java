@@ -2,8 +2,6 @@ package life.tannineo.cs7is3.group4;
 
 import life.tannineo.cs7is3.group4.entity.DocumentQuery;
 import life.tannineo.cs7is3.group4.parser.*;
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
@@ -36,14 +34,21 @@ public class App {
         // region 0. prepare and test field
         // TODO: replace the analyzer & similarity with custom one!
         BM25Similarity bm25Similarity = new BM25Similarity();
-        CharArraySet customStopWordSet = new CharArraySet(127, true);
-        customStopWordSet.addAll(Arrays.asList(CustomWordSet.customStopWords));
-        CharArraySet cusromNotToStemSet = new CharArraySet(100, true);
-        cusromNotToStemSet.addAll(Arrays.asList(CustomWordSet.customWordsNotToStem));
-        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer(customStopWordSet, cusromNotToStemSet);
+//        CharArraySet customStopWordSet = new CharArraySet(127, true);
+//        customStopWordSet.addAll(Arrays.asList(CustomWordSet.customStopWords));
+//        CharArraySet cusromNotToStemSet = new CharArraySet(100, true);
+//        cusromNotToStemSet.addAll(Arrays.asList(CustomWordSet.customWordsNotToStem));
+//        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer(customStopWordSet, cusromNotToStemSet);
+        MyAnalyzer myAnalyzer = new MyAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
         // endregion
 
-        // region 1. corpora parsing
+        // region 1 + 2. corpora parsing & indexing
+
+        IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
+        iwconfig.setSimilarity(bm25Similarity);
+        Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
+        iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times ???
+        IndexWriter indexWriter = new IndexWriter(indexDir, iwconfig);
 
 //        FbisParser fbisParser = new FbisParser();
 //        fbisParser.readFile("../corpora/fbis/fb396001.sgm");
@@ -54,58 +59,52 @@ public class App {
 //        LatimesParser latimesParser = new LatimesParser();
 //        latimesParser.readFile("../corpora/latimes/la010189.sgm");
 
-        ArrayList<Document> documents = new ArrayList<>();
+        ArrayList<Document> tempDocArr = new ArrayList<>();
 
         File FbisFolder = new File("../corpora/fbis");
         FbisParser fbisParser = new FbisParser();
         for (File sgm : Objects.requireNonNull(FbisFolder.listFiles())) {
             if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                ArrayList<Document> arr = fbisParser.toLucDoc(fbisParser.readFile(sgm.getAbsolutePath()));
-                documents.addAll(arr);
+                tempDocArr.addAll(fbisParser.toLucDoc(fbisParser.readFile(sgm.getAbsolutePath())));
             }
         }
+        indexWriter.addDocuments(tempDocArr);
+        System.out.println("Parsed fbis docs: " + tempDocArr.size());
+        tempDocArr.clear();
+
 
         File Fr94Folder = new File("../corpora/fr94");
         Fr94Parser fr94Parser = new Fr94Parser();
         for (File sgm : Objects.requireNonNull(Fr94Folder.listFiles())) {
             if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                ArrayList<Document> arr = fr94Parser.toLucDoc(fr94Parser.readFile(sgm.getAbsolutePath()));
-                documents.addAll(arr);
+                tempDocArr.addAll(fr94Parser.toLucDoc(fr94Parser.readFile(sgm.getAbsolutePath())));
             }
         }
+        indexWriter.addDocuments(tempDocArr);
+        System.out.println("Parsed fr94 docs: " + tempDocArr.size());
+        tempDocArr.clear();
 
         File FtFolder = new File("../corpora/ft");
         FtParser ftFolder = new FtParser();
         for (File sgm : Objects.requireNonNull(FtFolder.listFiles())) {
             if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                ArrayList<Document> arr = ftFolder.toLucDoc(ftFolder.readFile(sgm.getAbsolutePath()));
-                documents.addAll(arr);
+                tempDocArr.addAll(ftFolder.toLucDoc(ftFolder.readFile(sgm.getAbsolutePath())));
             }
         }
+        indexWriter.addDocuments(tempDocArr);
+        System.out.println("Parsed ft docs: " + tempDocArr.size());
+        tempDocArr.clear();
 
         File LatimesFolder = new File("../corpora/latimes");
         LatimesParser latimesParser = new LatimesParser();
         for (File sgm : Objects.requireNonNull(LatimesFolder.listFiles())) {
             if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                ArrayList<Document> arr = latimesParser.toLucDoc(latimesParser.readFile(sgm.getAbsolutePath()));
-                documents.addAll(arr);
+                tempDocArr.addAll(latimesParser.toLucDoc(latimesParser.readFile(sgm.getAbsolutePath())));
             }
         }
-
-        System.out.println("Parsed all documents... " + documents.size() + " documents in total!");
-
-        // endregion
-
-        // region 2. indexing
-
-        IndexWriterConfig iwconfig = new IndexWriterConfig(englishAnalyzer);
-        iwconfig.setSimilarity(bm25Similarity);
-        Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
-        iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times ???
-        IndexWriter indexWriter = new IndexWriter(indexDir, iwconfig);
-
-        // add document to the index
-        indexWriter.addDocuments(documents);
+        indexWriter.addDocuments(tempDocArr);
+        System.out.println("Parsed latimes docs: " + tempDocArr.size());
+        tempDocArr.clear();
 
         indexWriter.close();
         indexDir.close(); // close index before next use
@@ -122,10 +121,14 @@ public class App {
 //            System.out.println(documentQuery.narrative);
 //        }
         LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
-        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNames(), englishAnalyzer);
-        multiFieldQueryParser.setAllowLeadingWildcard(true);
+        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNames(), myAnalyzer);
+        // multiFieldQueryParser.setAllowLeadingWildcard(true);
         for (DocumentQuery dq : documentQueries) {
-            Query qry = multiFieldQueryParser.parse(dq.title + " " + dq.description + " " + dq.narrative);
+            System.out.println("Parsing Query ID:" + dq.queryId);
+            String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
+//            String parsedQueryStr = MyQueryStringParser.parseQueryString(myAnalyzer, dq.title + " " + dq.description + " " + dq.narrative);
+            System.out.println(parsedQueryStr);
+            Query qry = multiFieldQueryParser.parse(parsedQueryStr);
             queryLinkedHashMap.put(dq.queryId, qry);
         }
 

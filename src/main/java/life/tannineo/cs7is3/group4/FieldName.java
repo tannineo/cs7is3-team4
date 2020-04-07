@@ -2,25 +2,29 @@ package life.tannineo.cs7is3.group4;
 
 public enum FieldName {
 
+    // basic
     DOCNO("DOCNO"),
     TEXT("TEXT"),
     META("META"),
 
-    DOCID("DOCID"),
+    // extra
     DATE("DATE"),
-    SECTION("SECTION"),
-    LENGTH("LENGTH"),
     HEADLINE("HEADLINE"),
-    GRAPHIC("GRAPHIC"),
     TYPE("TYPE"),
     SUBJECT("SUBJECT"),
+    HEADER("HEADER"),
+    HT("HT"),
+    GRAPHIC("GRAPHIC"),
+
+    // non-sense
+    DOCID("DOCID"),
+    SECTION("SECTION"),
+    LENGTH("LENGTH"),
     BYLINE("BYLINE"),
     PROFILE("PROFILE"),
     PUB("PUB"),
     PAGE("PAGE"),
-    PARENT("PARENT"),
-    HT("HT"),
-    HEADER("HEADER");
+    PARENT("PARENT");
 
     private String name;
 
@@ -38,6 +42,30 @@ public enum FieldName {
         String[] arr = new String[size];
         for (int i = 0; i < size; i++) {
             arr[i] = allFieldNames[i].name;
+        }
+        return arr;
+    }
+
+    public static String[] getAllNamesExceptNonSense() {
+        FieldName[] allFieldNamesExceptNonSense = {
+            // basic
+            DOCNO,
+            TEXT,
+            META,
+
+            // extra
+            DATE,
+            HEADLINE,
+            TYPE,
+            SUBJECT,
+            HEADER,
+            HT,
+            GRAPHIC,
+        };
+        int size = allFieldNamesExceptNonSense.length;
+        String[] arr = new String[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = allFieldNamesExceptNonSense[i].name;
         }
         return arr;
     }
