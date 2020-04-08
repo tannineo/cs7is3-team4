@@ -3,15 +3,12 @@ package life.tannineo.cs7is3.group4;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.en.EnglishMinimalStemFilter;
 import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
-import org.apache.lucene.analysis.en.KStemFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.miscellaneous.TrimFilter;
-import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.wordnet.SynonymMap;
 import org.apache.lucene.wordnet.SynonymTokenFilter;
-import org.tartarus.snowball.ext.EnglishStemmer;
 
 import java.io.FileInputStream;
 import java.nio.file.Paths;
@@ -102,11 +99,11 @@ public class MySynonymAnalyzer extends Analyzer {
 //        tokenStream = new FlattenGraphFilter(tokenStream);
 
         // snow ball filter
-        tokenStream = new SnowballFilter(tokenStream, new EnglishStemmer());
+//        tokenStream = new SnowballFilter(tokenStream, new EnglishStemmer());
         // porter stemming
         tokenStream = new PorterStemFilter(tokenStream);
-        // k-stemming
-        tokenStream = new KStemFilter(tokenStream);
+//        // k-stemming
+//        tokenStream = new KStemFilter(tokenStream);
 
         return new TokenStreamComponents(tokenizer, tokenStream);
     }
