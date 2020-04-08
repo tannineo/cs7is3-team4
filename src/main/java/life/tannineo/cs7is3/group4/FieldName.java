@@ -2,8 +2,9 @@ package life.tannineo.cs7is3.group4;
 
 public enum FieldName {
 
-    // basic
     DOCNO("DOCNO"),
+
+    // basic
     TEXT("TEXT"),
     META("META"),
 
@@ -49,7 +50,6 @@ public enum FieldName {
     public static String[] getAllNamesExceptNonSense() {
         FieldName[] allFieldNamesExceptNonSense = {
             // basic
-            DOCNO,
             TEXT,
             META,
 
