@@ -3,22 +3,21 @@ package life.tannineo.cs7is3.group4;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.en.EnglishMinimalStemFilter;
 import org.apache.lucene.analysis.en.EnglishPossessiveFilter;
+import org.apache.lucene.analysis.en.KStemFilter;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.miscellaneous.SetKeywordMarkerFilter;
 import org.apache.lucene.analysis.miscellaneous.TrimFilter;
 import org.apache.lucene.analysis.snowball.SnowballFilter;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.synonym.SynonymGraphFilter;
-import org.apache.lucene.analysis.synonym.SynonymMap;
-import org.apache.lucene.analysis.synonym.WordnetSynonymParser;
+import org.apache.lucene.wordnet.SynonymMap;
+import org.apache.lucene.wordnet.SynonymTokenFilter;
 import org.tartarus.snowball.ext.EnglishStemmer;
 
-import java.io.*;
+import java.io.FileInputStream;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-public class MyQueryAnalyzer extends Analyzer {
+public class MySynonymAnalyzer extends Analyzer {
 
     private CharArraySet stopwords;
 
@@ -26,30 +25,30 @@ public class MyQueryAnalyzer extends Analyzer {
 
     private SynonymMap synonymMap;
 
-    public MyQueryAnalyzer() {
+    public MySynonymAnalyzer() {
         this.stopwords = new CharArraySet(100, true);
         this.stopwords.addAll(Arrays.asList(CustomWordSet.customStopWords));
         this.parseSynonyms();
     }
 
-    public MyQueryAnalyzer(CharArraySet stopwords) {
+    public MySynonymAnalyzer(CharArraySet stopwords) {
         this.stopwords = stopwords;
         this.parseSynonyms();
     }
 
-    public MyQueryAnalyzer(CharArraySet stopwords, CharArraySet keywords) {
+    public MySynonymAnalyzer(CharArraySet stopwords, CharArraySet keywords) {
         this.stopwords = stopwords;
         this.keywords = keywords;
         this.parseSynonyms();
     }
 
-    public MyQueryAnalyzer(String[] stopwords) {
+    public MySynonymAnalyzer(String[] stopwords) {
         this.stopwords = new CharArraySet(300, true);
         this.stopwords.addAll(Arrays.asList(stopwords));
         this.parseSynonyms();
     }
 
-    public MyQueryAnalyzer(String[] stopwords, String[] keywords) {
+    public MySynonymAnalyzer(String[] stopwords, String[] keywords) {
         this.stopwords = new CharArraySet(300, true);
         this.stopwords.addAll(Arrays.asList(stopwords));
         this.keywords = new CharArraySet(300, true);
@@ -59,16 +58,18 @@ public class MyQueryAnalyzer extends Analyzer {
     }
 
     private void parseSynonyms() {
-        WordnetSynonymParser parser = new WordnetSynonymParser(true, true, new StandardAnalyzer());
-        SynonymMap synonymMap = null;
+//        WordnetSynonymParser parser = new WordnetSynonymParser(true, true, new StandardAnalyzer());
+//        SynonymMap synonymMap = null;
         try {
-            File file = new File(Paths.get("./wn_s.pl").toAbsolutePath().toString());
-            InputStream stream = new FileInputStream(file);
-            Reader rulesReader = new InputStreamReader(stream);
-            parser.parse(rulesReader);
-            synonymMap = parser.build();
-            rulesReader.close();
-            stream.close();
+//            File file = new File(Paths.get("./wn_s.pl").toAbsolutePath().toString());
+//            InputStream stream = new FileInputStream(file);
+//            Reader rulesReader = new InputStreamReader(stream);
+//            parser.parse(rulesReader);
+//            synonymMap = parser.build();
+//            rulesReader.close();
+//            stream.close();
+
+            org.apache.lucene.wordnet.SynonymMap newMap = synonymMap = new org.apache.lucene.wordnet.SynonymMap(new FileInputStream(Paths.get("./wn_s.pl").toAbsolutePath().toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -95,14 +96,17 @@ public class MyQueryAnalyzer extends Analyzer {
         // remove stopwords
         tokenStream = new StopFilter(tokenStream, this.stopwords);
 
+
         // synonyms
-        tokenStream = new SynonymGraphFilter(tokenStream, this.synonymMap, true);
+        tokenStream = new SynonymTokenFilter(tokenStream, this.synonymMap, 3);
 //        tokenStream = new FlattenGraphFilter(tokenStream);
 
         // snow ball filter
         tokenStream = new SnowballFilter(tokenStream, new EnglishStemmer());
         // porter stemming
         tokenStream = new PorterStemFilter(tokenStream);
+        // k-stemming
+        tokenStream = new KStemFilter(tokenStream);
 
         return new TokenStreamComponents(tokenizer, tokenStream);
     }

@@ -39,8 +39,9 @@ public class App {
 //        CharArraySet cusromNotToStemSet = new CharArraySet(100, true);
 //        cusromNotToStemSet.addAll(Arrays.asList(CustomWordSet.customWordsNotToStem));
 //        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer(customStopWordSet, cusromNotToStemSet);
+
         MyAnalyzer myAnalyzer = new MyAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
-        MyQueryAnalyzer myQueryAnalyzer = new MyQueryAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
+        MySynonymAnalyzer mySynonymAnalyzer = new MySynonymAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
         // endregion
 
         // region 1 + 2. corpora parsing & indexing
@@ -122,7 +123,7 @@ public class App {
 //            System.out.println(documentQuery.narrative);
 //        }
         LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
-        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNames(), myQueryAnalyzer);
+        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mySynonymAnalyzer);
         // multiFieldQueryParser.setAllowLeadingWildcard(true);
         for (DocumentQuery dq : documentQueries) {
             System.out.println("Parsing Query ID:" + dq.queryId);
