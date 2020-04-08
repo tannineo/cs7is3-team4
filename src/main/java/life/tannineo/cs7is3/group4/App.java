@@ -46,7 +46,7 @@ public class App {
 
         // region 1 + 2. corpora parsing & indexing
 
-        boolean toIndex = true;
+        boolean toIndex = false;
         if (toIndex) {
 
             IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
@@ -182,8 +182,8 @@ public class App {
         // multiFieldQueryParser.setAllowLeadingWildcard(true);
         for (DocumentQuery dq : documentQueries) {
             System.out.println("Parsing Query ID:" + dq.queryId);
-            String parsedQueryStr = dq.title + " " + dq.description;
-//            String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
+//            String parsedQueryStr = dq.title + " " + dq.description;
+            String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
 //            String parsedQueryStr = MyQueryStringParser.parseQueryString(dq.title + " " + dq.description + " " + dq.narrative);
             Query qry = multiFieldQueryParser.parse(parsedQueryStr);
             System.out.println(qry.toString());
