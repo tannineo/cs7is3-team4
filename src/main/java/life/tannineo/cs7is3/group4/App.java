@@ -61,50 +61,33 @@ public class App {
 
         ArrayList<Document> tempDocArr = new ArrayList<>();
 
-        File FbisFolder = new File("../corpora/fbis");
-        FbisParser fbisParser = new FbisParser();
-        for (File sgm : Objects.requireNonNull(FbisFolder.listFiles())) {
-            if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                tempDocArr.addAll(fbisParser.toLucDoc(fbisParser.readFile(sgm.getAbsolutePath())));
-            }
-        }
-        indexWriter.addDocuments(tempDocArr);
-        System.out.println("Parsed fbis docs: " + tempDocArr.size());
-        tempDocArr.clear();
+		for (int i = 0; i < corporaName.length; i++) {
+			String corp = corporaName[i];
+			File folder = new File("../corpora/" + corp);
 
+			DocumentParser parser;
+			if (i == 0) {
+				parser = new FbisParser();
+			} else if (i == 1) {
+				parser = new Fr94Parser();
+			} else if (i == 2) {
+				parser = new FtParser();
+			} else {
+				parser = new LatimesParser();
+			}
 
-        File Fr94Folder = new File("../corpora/fr94");
-        Fr94Parser fr94Parser = new Fr94Parser();
-        for (File sgm : Objects.requireNonNull(Fr94Folder.listFiles())) {
-            if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                tempDocArr.addAll(fr94Parser.toLucDoc(fr94Parser.readFile(sgm.getAbsolutePath())));
-            }
-        }
-        indexWriter.addDocuments(tempDocArr);
-        System.out.println("Parsed fr94 docs: " + tempDocArr.size());
-        tempDocArr.clear();
+	        System.out.println("Parsing " + corp + "...");
 
-        File FtFolder = new File("../corpora/ft");
-        FtParser ftFolder = new FtParser();
-        for (File sgm : Objects.requireNonNull(FtFolder.listFiles())) {
-            if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                tempDocArr.addAll(ftFolder.toLucDoc(ftFolder.readFile(sgm.getAbsolutePath())));
-            }
-        }
-        indexWriter.addDocuments(tempDocArr);
-        System.out.println("Parsed ft docs: " + tempDocArr.size());
-        tempDocArr.clear();
+	        for (File sgm : Objects.requireNonNull(folder.listFiles())) {
+	            if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
+	                tempDocArr.addAll(parser.toLucDoc(parser.readFile(sgm.getAbsolutePath())));
+	            }
+	        }
 
-        File LatimesFolder = new File("../corpora/latimes");
-        LatimesParser latimesParser = new LatimesParser();
-        for (File sgm : Objects.requireNonNull(LatimesFolder.listFiles())) {
-            if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-                tempDocArr.addAll(latimesParser.toLucDoc(latimesParser.readFile(sgm.getAbsolutePath())));
-            }
-        }
-        indexWriter.addDocuments(tempDocArr);
-        System.out.println("Parsed latimes docs: " + tempDocArr.size());
-        tempDocArr.clear();
+	        indexWriter.addDocuments(tempDocArr);
+	        System.out.println("Finished parsing " + corp + ". Docs: " + tempDocArr.size());
+	        tempDocArr.clear();
+		}
 
         indexWriter.close();
         indexDir.close(); // close index before next use
@@ -127,7 +110,7 @@ public class App {
             System.out.println("Parsing Query ID:" + dq.queryId);
             String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
 //            String parsedQueryStr = MyQueryStringParser.parseQueryString(myAnalyzer, dq.title + " " + dq.description + " " + dq.narrative);
-            System.out.println(parsedQueryStr);
+//            System.out.println(parsedQueryStr);
             Query qry = multiFieldQueryParser.parse(parsedQueryStr);
             queryLinkedHashMap.put(dq.queryId, qry);
         }
@@ -150,7 +133,7 @@ public class App {
             for (ScoreDoc hit : topHits) {
                 Document doc = searcher.doc(hit.doc);
                 String result = queryEntry.getKey() + " 0 " + doc.get(FieldName.DOCNO.getName()) + " 0 " + hit.score + " STANDARD";
-                System.out.println(result);
+//                System.out.println(result);
                 // add the result
                 resultArr.add(result);
             }
