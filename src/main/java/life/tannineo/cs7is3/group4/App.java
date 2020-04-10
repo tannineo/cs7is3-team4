@@ -121,11 +121,12 @@ public class App {
 //            System.out.println(documentQuery.narrative);
 //        }
         LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
-        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNames(), myAnalyzer);
+		String[] relevantFields = {"TEXT"};
+        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(relevantFields, myAnalyzer);
         // multiFieldQueryParser.setAllowLeadingWildcard(true);
         for (DocumentQuery dq : documentQueries) {
             System.out.println("Parsing Query ID:" + dq.queryId);
-            String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
+            String parsedQueryStr = dq.description;
 //            String parsedQueryStr = MyQueryStringParser.parseQueryString(myAnalyzer, dq.title + " " + dq.description + " " + dq.narrative);
             System.out.println(parsedQueryStr);
             Query qry = multiFieldQueryParser.parse(parsedQueryStr);
