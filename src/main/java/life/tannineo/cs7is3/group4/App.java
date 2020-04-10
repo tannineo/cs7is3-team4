@@ -32,7 +32,6 @@ public class App {
     public static void main(String args[]) throws Exception {
 
         // region 0. prepare and test field
-        // TODO: replace the analyzer & similarity with custom one!
         BM25Similarity bm25Similarity = new BM25Similarity();
 //        CharArraySet customStopWordSet = new CharArraySet(127, true);
 //        customStopWordSet.addAll(Arrays.asList(CustomWordSet.customStopWords));
@@ -66,57 +65,57 @@ public class App {
 
             ArrayList<Document> tempDocArr = new ArrayList<>();
 
-		for (int i = 0; i < corporaName.length; i++) {
-			String corp = corporaName[i];
-			File folder = new File("../corpora/" + corp);
+            for (int i = 0; i < corporaName.length; i++) {
+                String corp = corporaName[i];
+                File folder = new File("../corpora/" + corp);
 
-			DocumentParser parser;
-			if (i == 0) {
-				parser = new FbisParser();
-			} else if (i == 1) {
-				parser = new Fr94Parser();
-			} else if (i == 2) {
-				parser = new FtParser();
-			} else {
-				parser = new LatimesParser();
-			}
+                DocumentParser parser;
+                if (i == 0) {
+                    parser = new FbisParser();
+                } else if (i == 1) {
+                    parser = new Fr94Parser();
+                } else if (i == 2) {
+                    parser = new FtParser();
+                } else {
+                    parser = new LatimesParser();
+                }
 
-	        System.out.println("Parsing " + corp + "...");
+                System.out.println("Parsing " + corp + "...");
 
-	        for (File sgm : Objects.requireNonNull(folder.listFiles())) {
-	            if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-	                tempDocArr.addAll(parser.toLucDoc(parser.readFile(sgm.getAbsolutePath())));
-	            }
-	        }
+                for (File sgm : Objects.requireNonNull(folder.listFiles())) {
+                    if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
+                        tempDocArr.addAll(parser.toLucDoc(parser.readFile(sgm.getAbsolutePath())));
+                    }
+                }
 
-	        indexWriter.addDocuments(tempDocArr);
-	        System.out.println("Finished parsing " + corp + ". Docs: " + tempDocArr.size());
-	        tempDocArr.clear();
-		}
+                indexWriter.addDocuments(tempDocArr);
+                System.out.println("Finished parsing " + corp + ". Docs: " + tempDocArr.size());
+                tempDocArr.clear();
+            }
 
 
-        // endregion
+            // endregion
 
-        // region 3. query parsing
-        ArrayList<DocumentQuery> documentQueries = new QueryParser().readQueries("topics");
+            // region 3. query parsing
+            ArrayList<DocumentQuery> documentQueries = new QueryParser().readQueries("topics");
 //        for (DocumentQuery documentQuery : documentQueries) {
 //            System.out.println(documentQuery.title);
 //            System.out.println(documentQuery.description);
 //            System.out.println(documentQuery.narrative);
 //        }
-        LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
+            LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
 
-        // parameter tuning
-        HashMap<String, Float> boosts = new HashMap<>();
+            // parameter tuning
+            HashMap<String, Float> boosts = new HashMap<>();
 
-        // search_result_1586350867320 MAP = 0.2993
+            // search_result_1586350867320 MAP = 0.2993
 //        boosts.put(FieldName.TEXT.getName(), 20f);
 //        boosts.put(FieldName.META.getName(), 5f);
 //        boosts.put(FieldName.GRAPHIC.getName(), 3f);
 //        boosts.put(FieldName.HEADLINE.getName(), 2f);
 //        boosts.put(FieldName.HEADER.getName(), 2f);
 
-        // search_result_1586351017203 MAP = 0.2870
+            // search_result_1586351017203 MAP = 0.2870
 //        boosts.put(FieldName.TEXT.getName(), 20f);
 //        boosts.put(FieldName.META.getName(), 5f);
 //        boosts.put(FieldName.GRAPHIC.getName(), 10f);
@@ -127,7 +126,7 @@ public class App {
 //        boosts.put(FieldName.SUBJECT.getName(), 5f);
 //        boosts.put(FieldName.DATE.getName(), 5f);
 
-        // search_result_1586351149955 MAP = 0.2884
+            // search_result_1586351149955 MAP = 0.2884
 //        boosts.put(FieldName.TEXT.getName(), 20f);
 //        boosts.put(FieldName.META.getName(), 5f);
 //        boosts.put(FieldName.GRAPHIC.getName(), 10f);
@@ -135,69 +134,70 @@ public class App {
 //        boosts.put(FieldName.SUBJECT.getName(), 5f);
 //        boosts.put(FieldName.DATE.getName(), 5f);
 
-        // search_result_1586351229036 MAP = 0.2883
+            // search_result_1586351229036 MAP = 0.2883
 //        boosts.put(FieldName.TEXT.getName(), 20f);
 //        boosts.put(FieldName.META.getName(), 10f);
 //        boosts.put(FieldName.GRAPHIC.getName(), 5f);
 
-        // search_result_1586351305185 MAP = 0.3010
+            // search_result_1586351305185 MAP = 0.3010
 //        boosts.put(FieldName.TEXT.getName(), 30f);
 //        boosts.put(FieldName.META.getName(), 5f);
 //        boosts.put(FieldName.GRAPHIC.getName(), 3f);
 //        boosts.put(FieldName.HEADLINE.getName(), 2f);
 //        boosts.put(FieldName.HEADER.getName(), 2f);
 
-        // removed k-stem and snowball using these MAP = 0.3010
-        boosts.put(FieldName.TEXT.getName(), 40f);
-        boosts.put(FieldName.GRAPHIC.getName(), 3f);
-        boosts.put(FieldName.HEADLINE.getName(), 2f);
-        boosts.put(FieldName.HEADER.getName(), 2f);
-        boosts.put(FieldName.HT.getName(), 5f);
+            // removed k-stem and snowball using these MAP = 0.3010
+            boosts.put(FieldName.TEXT.getName(), 40f);
+            boosts.put(FieldName.GRAPHIC.getName(), 3f);
+            boosts.put(FieldName.HEADLINE.getName(), 2f);
+            boosts.put(FieldName.HEADER.getName(), 2f);
+            boosts.put(FieldName.HT.getName(), 5f);
 
 
-        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mySynonymAnalyzer, boosts);
-        // multiFieldQueryParser.setAllowLeadingWildcard(true);
-        for (DocumentQuery dq : documentQueries) {
-            System.out.println("Parsing Query ID:" + dq.queryId);
+            MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mySynonymAnalyzer, boosts);
+            // multiFieldQueryParser.setAllowLeadingWildcard(true);
+            for (DocumentQuery dq : documentQueries) {
+                System.out.println("Parsing Query ID:" + dq.queryId);
 //            String parsedQueryStr = dq.title + " " + dq.description;
-            String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
+                String parsedQueryStr = dq.title + " " + dq.description + " " + dq.narrative;
 //            String parsedQueryStr = MyQueryStringParser.parseQueryString(dq.title + " " + dq.description + " " + dq.narrative);
-            Query qry = multiFieldQueryParser.parse(parsedQueryStr);
-            System.out.println(qry.toString());
-            queryLinkedHashMap.put(dq.queryId, qry);
-        }
-
-        System.out.println("Parsed all queries... " + queryLinkedHashMap.entrySet().size() + " in total!");
-        // endregion
-
-        // region 4. search
-        Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
-        DirectoryReader dirReader = DirectoryReader.open(dirr);
-        IndexSearcher searcher = new IndexSearcher(dirReader);
-        searcher.setSimilarity(bm25Similarity);
-
-        ArrayList<String> resultArr = new ArrayList<>();
-
-        for (Map.Entry<String, Query> queryEntry : queryLinkedHashMap.entrySet()) {
-            TopDocs topDocs = searcher.search(queryEntry.getValue(), HITS_PER_PAGE);
-            ScoreDoc[] topHits = topDocs.scoreDocs;
-
-            for (ScoreDoc hit : topHits) {
-                Document doc = searcher.doc(hit.doc);
-                String result = queryEntry.getKey() + " 0 " + doc.get(FieldName.DOCNO.getName()) + " 0 " + hit.score + " STANDARD";
-//                System.out.println(result);
-                // add the result
-                resultArr.add(result);
+                Query qry = multiFieldQueryParser.parse(parsedQueryStr);
+                System.out.println(qry.toString());
+                queryLinkedHashMap.put(dq.queryId, qry);
             }
+
+            System.out.println("Parsed all queries... " + queryLinkedHashMap.entrySet().size() + " in total!");
+            // endregion
+
+            // region 4. search
+            Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
+            DirectoryReader dirReader = DirectoryReader.open(dirr);
+            IndexSearcher searcher = new IndexSearcher(dirReader);
+            searcher.setSimilarity(bm25Similarity);
+
+            ArrayList<String> resultArr = new ArrayList<>();
+
+            for (Map.Entry<String, Query> queryEntry : queryLinkedHashMap.entrySet()) {
+                TopDocs topDocs = searcher.search(queryEntry.getValue(), HITS_PER_PAGE);
+                ScoreDoc[] topHits = topDocs.scoreDocs;
+
+                for (ScoreDoc hit : topHits) {
+                    Document doc = searcher.doc(hit.doc);
+                    String result = queryEntry.getKey() + " 0 " + doc.get(FieldName.DOCNO.getName()) + " 0 " + hit.score + " STANDARD";
+//                System.out.println(result);
+                    // add the result
+                    resultArr.add(result);
+                }
+            }
+            // endregion
+
+            // region 5. gen results
+            String filename = "search_result_" + new Date().getTime();
+            Path resultPath = Paths.get(filename);
+            Files.write(resultPath, resultArr, StandardCharsets.UTF_8);
+
+            System.out.println(filename + " complete!");
+            // endregion
         }
-        // endregion
-
-        // region 5. gen results
-        String filename = "search_result_" + new Date().getTime();
-        Path resultPath = Paths.get(filename);
-        Files.write(resultPath, resultArr, StandardCharsets.UTF_8);
-
-        System.out.println(filename + " complete!");
-        // endregion
     }
 }
