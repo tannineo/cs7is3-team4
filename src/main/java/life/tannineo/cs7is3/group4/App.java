@@ -16,6 +16,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +46,8 @@ public class App {
 
         // region 1 + 2. corpora parsing & indexing
 
-        boolean toIndex = false;
+        //set flag to use old indexes and to save time, toIndex = flag
+        boolean toIndex = true;
         if (toIndex) {
 
             IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
@@ -92,7 +94,12 @@ public class App {
                 System.out.println("Finished parsing " + corp + ". Docs: " + tempDocArr.size());
                 tempDocArr.clear();
             }
-
+            try {
+                indexWriter.close();
+            } catch (IOException e) {
+                System.out.println("ERROR: an error occurred when closing the index from the directory!");
+                System.out.println(String.format("ERROR MESSAGE: %s", e.getMessage()));
+            }
 
             // endregion
 
