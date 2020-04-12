@@ -48,3 +48,4 @@ search_result_*
 
 # node modules
 node_modules/
+/bin/
