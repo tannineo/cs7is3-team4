@@ -2,6 +2,8 @@ package life.tannineo.cs7is3.group4;
 
 import life.tannineo.cs7is3.group4.entity.DocumentQuery;
 import life.tannineo.cs7is3.group4.parser.*;
+
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
@@ -21,6 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 
 public class App {
@@ -31,7 +35,7 @@ public class App {
     private static String[] corporaName = {"fbis", "fr94", "ft", "latimes"};
 
     public static void main(String args[]) throws Exception {
-
+    	long start = System.currentTimeMillis();
         // region 0. prepare and test field
         BM25Similarity bm25Similarity = new BM25Similarity();
 //        CharArraySet customStopWordSet = new CharArraySet(127, true);
@@ -40,8 +44,9 @@ public class App {
 //        cusromNotToStemSet.addAll(Arrays.asList(CustomWordSet.customWordsNotToStem));
 //        EnglishAnalyzer englishAnalyzer = new EnglishAnalyzer(customStopWordSet, cusromNotToStemSet);
 
-        MyAnalyzer myAnalyzer = new MyAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
-        MySynonymAnalyzer mySynonymAnalyzer = new MySynonymAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
+//          MyAnalyzer myAnalyzer = new MyAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);
+//          MySynonymAnalyzer mySynonymAnalyzer = new MySynonymAnalyzer(CustomWordSet.extraLongStopwordList, CustomWordSet.customWordsNotToStem);          
+          Analyzer mCustomAnalyzer_Syn_stp = new CustomAnalyzer_Syn_stp(); /* use mCustomAnalyzer_Syn_stp */
         // endregion
 
         // region 1 + 2. corpora parsing & indexing
@@ -50,7 +55,9 @@ public class App {
         boolean toIndex = true;
         if (toIndex) {
 
-            IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
+//            IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
+            IndexWriterConfig iwconfig = new IndexWriterConfig(mCustomAnalyzer_Syn_stp); /* use mCustomAnalyzer_Syn_stp */
+            
             iwconfig.setSimilarity(bm25Similarity);
             Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
             iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times ???
@@ -161,7 +168,8 @@ public class App {
             boosts.put(FieldName.HT.getName(), 5f);
 
 
-            MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mySynonymAnalyzer, boosts);
+//            MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mySynonymAnalyzer, boosts);
+            MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mCustomAnalyzer_Syn_stp, boosts); /* use mCustomAnalyzer_Syn_stp */
             // multiFieldQueryParser.setAllowLeadingWildcard(true);
             for (DocumentQuery dq : documentQueries) {
                 System.out.println("Parsing Query ID:" + dq.queryId);
@@ -205,6 +213,12 @@ public class App {
 
             System.out.println(filename + " complete!");
             // endregion
+            
+            long end = System.currentTimeMillis();
+
+            NumberFormat secFormatter = new DecimalFormat("#0.00000");
+            System.out.println("Program Running time is " + secFormatter.format((end - start) / 1000d) + " seconds");
+
         }
     }
 }
