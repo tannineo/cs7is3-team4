@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public interface DocumentParser<T> {
 
-    ArrayList<T> readFile(String filePath) throws Exception;
+	ArrayList<T> readFile(String filePath) throws Exception;
 
-    ArrayList<Document> toLucDoc(ArrayList<T> arr);
+	ArrayList<Document> toLucDoc(ArrayList<T> arr);
 }

@@ -2,21 +2,21 @@ package life.tannineo.cs7is3.group4.entity;
 
 public class DocumentLatimes extends DocumentBasic {
 
-    public String docId;
+	public String docId;
 
-    public String date;
+	public String date;
 
-    public String section;
+	public String section;
 
-    public String length;
+	public String length;
 
-    public String headline;
+	public String headline;
 
-    public String graphic;
+	public String graphic;
 
-    public String type;
+	public String type;
 
-    public String subject;
+	public String subject;
 
-    public String byline;
+	public String byline;
 }

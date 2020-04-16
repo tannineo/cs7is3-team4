@@ -12,38 +12,38 @@ import java.util.Set;
 
 public class MyQueryStringParser {
 
-    public static String parseQueryString(String keywords) throws Exception {
+	public static String parseQueryString(String keywords) throws Exception {
 
-        List<String> result = new ArrayList<>();
+		List<String> result = new ArrayList<>();
 
-        StandardAnalyzer analyzer = new StandardAnalyzer();
+		StandardAnalyzer analyzer = new StandardAnalyzer();
 
-        try {
-            TokenStream stream = analyzer.tokenStream(null, new StringReader(keywords));
-            stream.reset();
-            while (stream.incrementToken()) {
-                result.add(stream.getAttribute(CharTermAttribute.class).toString());
-            }
-            stream.close();
-        } catch (Exception e) {
-            throw e;
-        }
+		try {
+			TokenStream stream = analyzer.tokenStream(null, new StringReader(keywords));
+			stream.reset();
+			while (stream.incrementToken()) {
+				result.add(stream.getAttribute(CharTermAttribute.class).toString());
+			}
+			stream.close();
+		} catch (Exception e) {
+			throw e;
+		}
 
-        // remove duplicates
-        Set<String> keywordSet = new HashSet<>();
-        for (String str : result) {
-            for (String strr : str.split(" ")) {
-                if (!str.equals("_")) keywordSet.add(strr);
-            }
-        }
+		// remove duplicates
+		Set<String> keywordSet = new HashSet<>();
+		for (String str : result) {
+			for (String strr : str.split(" ")) {
+				if (!str.equals("_")) keywordSet.add(strr);
+			}
+		}
 
-        // construct new string
-        StringBuilder resultString = new StringBuilder();
-        for (String str : keywordSet) {
-            if (!str.equals("_")) resultString.append(str).append(" ");
-        }
+		// construct new string
+		StringBuilder resultString = new StringBuilder();
+		for (String str : keywordSet) {
+			if (!str.equals("_")) resultString.append(str).append(" ");
+		}
 
 
-        return resultString.toString();
-    }
+		return resultString.toString();
+	}
 }
