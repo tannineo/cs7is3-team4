@@ -10,6 +10,10 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -20,6 +24,7 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -111,13 +116,20 @@ public class App {
 
             // endregion
         }
-            // region 3. query parsing
-            LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
-        	parse_query(mCustomAnalyzer_Syn_stp, queryLinkedHashMap);
-            // endregion
-        	// region 4. query searching
-            search_query(bm25Similarity,queryLinkedHashMap);
+//            // region 3. query parsing
+//            LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
+//        	parse_query(mCustomAnalyzer_Syn_stp, queryLinkedHashMap);
+//            // endregion
+//        	// region 4. query searching
+//            search_query(bm25Similarity,queryLinkedHashMap);
 
+            //New query parsing and search 
+        	//author: Vishal
+            // region 3. query parsing // region 4. query searching
+        	parse_search_query(bm25Similarity, mCustomAnalyzer_Syn_stp); 
+            // endregion
+
+        	
             long end = System.currentTimeMillis();
 
             NumberFormat secFormatter = new DecimalFormat("#0.00000");
@@ -127,7 +139,7 @@ public class App {
     }
     
     private static void parse_query(Analyzer mCustomAnalyzer_Syn_stp, LinkedHashMap<String, Query> queryLinkedHashMap) throws ParseException {
-        ArrayList<DocumentQuery> documentQueries = new QueryParser().readQueries("topics");
+        ArrayList<DocumentQuery> documentQueries = new CustomQueryParser().readQueries("topics");
 //    for (DocumentQuery documentQuery : documentQueries) {
 //        System.out.println(documentQuery.title);
 //        System.out.println(documentQuery.description);
@@ -230,4 +242,114 @@ public class App {
         System.out.println(filename + " complete!");
         // endregion
     }
+    private static void parse_search_query(BM25Similarity bm25Similarity, Analyzer mCustomAnalyzer_Syn_stp) throws ParseException, IOException {
+        
+        Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
+        DirectoryReader dirReader = DirectoryReader.open(dirr);
+        IndexSearcher indexSearcher = new IndexSearcher(dirReader);
+        indexSearcher.setSimilarity(bm25Similarity);
+        
+        PrintWriter writer = new PrintWriter("new_queryResults", "UTF-8");
+		
+    	ArrayList<DocumentQuery> documentQueries = new CustomQueryParser().readQueries("topics");
+        HashMap<String, Float> boosts = new HashMap<>();
+        
+//        search_result_1586960735098 MAP = 0.3200
+        boosts.put(FieldName.HEADLINE.getName(), (float) 0.1);
+        boosts.put(FieldName.TEXT.getName(), (float) 0.9);
+        
+        MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mCustomAnalyzer_Syn_stp, boosts); /* use mCustomAnalyzer_Syn_stp */
+        
+        for (DocumentQuery dq : documentQueries) {
+            System.out.print("Parsing Query ID:" + dq.queryId + " . ");
+//			System.out.println(dq.title + " " + dq.description + " " + dq.narrative);
+			
+		    List<String> splitNarrative = groupNarrativeRelevencey(dq.narrative);
+            String relevantNarr = splitNarrative.get(0).trim();
+            
+            BooleanQuery.Builder booleanQuery = new BooleanQuery.Builder();
+            
+            if (dq.title.length() > 0) {
+            	Query titleQuery = multiFieldQueryParser.parse(QueryParser.escape(dq.title));
+				Query descriptionQuery = multiFieldQueryParser.parse(QueryParser.escape(dq.description));
+				Query narrativeQuery = null;
+				if(relevantNarr.length()>0) {
+					narrativeQuery = multiFieldQueryParser.parse(QueryParser.escape(relevantNarr));
+				}
+				booleanQuery.add(new BoostQuery(titleQuery, (float) 4), BooleanClause.Occur.SHOULD);
+				booleanQuery.add(new BoostQuery(descriptionQuery, (float) 2), BooleanClause.Occur.SHOULD);
+				if (narrativeQuery != null) {
+					booleanQuery.add(new BoostQuery(narrativeQuery, (float) 1.2), BooleanClause.Occur.SHOULD);
+				}
+				//search
+				System.out.println("Searching Query...");
+				ScoreDoc[] hits = indexSearcher.search(booleanQuery.build(), HITS_PER_PAGE).scoreDocs;
+				
+				for (int hitIndex = 0; hitIndex < hits.length; hitIndex++) {
+					ScoreDoc hit = hits[hitIndex];
+					
+					writer.println(dq.queryId + " 0 " + indexSearcher.doc(hit.doc).get(FieldName.DOCNO.getName()) + " " + hitIndex + " " + hit.score + " 0 ");					
+					}            	
+            }
+        }
+		closeIndexReader(dirReader);
+		closePrintWriter(writer);
+        System.out.println("Parsed all queries... " + documentQueries.size() + " in total!");
+		System.out.println("queries executed");
+    }
+
+	/** 
+	 * Create a list of 2 string as relevant and non relevant for each 
+	 * query by filtering 'not relevant' or 'relevant'phrases which not 
+	 * not useful.  
+	 * @param narStr- narrative string present in current query
+	 * @return
+	 */
+	private static List<String> groupNarrativeRelevencey(String narStr) {
+		StringBuilder relevantNarrStr = new StringBuilder();
+		StringBuilder irrelevantNarrStr = new StringBuilder();
+		String[] narStrSplited = narStr.toLowerCase().split("\\.");
+		List<String> result = new ArrayList<String>();
+		for (String curStr : narStrSplited) {
+			if (!curStr.contains("not relevant") && !curStr.contains("irrelevant")) {
+				String usefulStr = curStr.replaceAll("a relevant document|"
+						+ "a document will|to be relevant|"
+						+ "relevant documents|"
+						+ "a document must|"
+						+ "relevant|"
+						+ "will contain|"
+						+ "will discuss|"
+						+ "will provide|"
+						+ "must cite",
+						"");
+				relevantNarrStr.append(usefulStr);
+			} else {
+				String re = curStr.replaceAll("are also not relevant|"
+						+ "are not relevant|"
+						+ "are irrelevant|"
+						+ "is not relevant", "");
+				irrelevantNarrStr.append(re);
+			}
+		}
+		result.add(relevantNarrStr.toString());
+		result.add(irrelevantNarrStr.toString());
+		return result;
+	}
+	
+	
+	private static void closeIndexReader(DirectoryReader dirReader) {
+        try {
+        	dirReader.close();
+        } catch (IOException e) {
+            System.out.println("ERROR: an error occurred when closing the index from the directory!");
+            System.out.println(String.format("ERROR MESSAGE: %s", e.getMessage()));
+        }
+    }
+
+    private static void closePrintWriter(PrintWriter writer){
+        writer.flush();
+        writer.close();
+    }
+
+
 }

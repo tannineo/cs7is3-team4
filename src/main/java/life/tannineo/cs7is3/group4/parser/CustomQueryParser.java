@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
 import java.io.File;
 import java.util.ArrayList;
 
-public class QueryParser {
+public class CustomQueryParser {
     public ArrayList<DocumentQuery> readQueries(String queryFilePath) {
         ArrayList<DocumentQuery> QueryArray = new ArrayList<>();
         try {

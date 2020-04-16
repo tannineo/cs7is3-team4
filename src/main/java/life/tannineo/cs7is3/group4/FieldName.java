@@ -51,16 +51,16 @@ public enum FieldName {
         FieldName[] allFieldNamesExceptNonSense = {
             // basic
             TEXT,
-            META,
+//            META,
 
             // extra
-            DATE,
+//            DATE,
             HEADLINE,
-            TYPE,
-            SUBJECT,
-            HEADER,
-            HT,
-            GRAPHIC,
+//            TYPE,
+//            SUBJECT,
+//            HEADER,
+//            HT,
+//            GRAPHIC,
         };
         int size = allFieldNamesExceptNonSense.length;
         String[] arr = new String[size];
