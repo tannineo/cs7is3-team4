@@ -11,23 +11,28 @@ import org.apache.lucene.search.similarities.Similarity;
 
 public class AppUtility {
 	// Supported Ranking models
-	private static final String CLASSIC = "CLASSIC";
+	private static final String CLASSIC = "Classic";
 	private static final String BM25 = "BM25";
-	private static final String BOOLEAN = "BOOLEAN";
-	private static final String LM_DIRICHLET = "LM_DIRICHLET";
-	private static final String LMJELINEKMERCER = "LMJELINEKMERCER"; //LMJelinekMercerSimilarity
+	private static final String BOOLEAN = "Boolean";
+	private static final String LMDIRICHLET = "LMDirichlet";
+	private static final String LMJELINEKMERCER = "LMJelinekMercer";
 
-	private static final String[] ALL_SCORING_MODELS = {CLASSIC, BM25, LM_DIRICHLET, LMJELINEKMERCER};
+	public static final String[] ALL_SCORING_MODELS = {CLASSIC, BM25, LMDIRICHLET, LMJELINEKMERCER};
 
 	// Analysers
-	private static final String STANDARD = "STANDARD";
-	private static final String ENGLISH = "ENGLISH";
-	private static final String CUSTOM1 = "CUSTOM1";
-	private static final String CUSTOM2 = "CUSTOM2";
-	private static final String CUSTOM3 = "CUSTOM3";
-	private static final String[] ALL_ANALYZERS = {STANDARD, ENGLISH, CUSTOM1, CUSTOM2, CUSTOM3};
+	private static final String STANDARD = "Standard";
+	private static final String ENGLISH = "English";
+	private static final String CUSTOM1 = "Custom1";
+	private static final String CUSTOM2 = "Custom2";
+	private static final String CUSTOM3 = "Custom3";
+	public static final String[] ALL_ANALYZERS = {STANDARD, ENGLISH, CUSTOM1, CUSTOM2, CUSTOM3};
 
 
+	/** 
+	 * Check passed argument is valid analyzer name
+	 * @param analyzer
+	 * @return
+	 */
 	public static boolean isValidAnalyzer(String analyzer) {
 		for (String Model : ALL_ANALYZERS) {
 			if (analyzer.equals(Model)) {
@@ -37,6 +42,11 @@ public class AppUtility {
 		return false;
 	}
 
+	/**
+	 * Check passed argument is valid scoring model name
+	 * @param rankModel
+	 * @return
+	 */
 	public static boolean isValidScoringModel(String rankModel) {
 		for(String Model : ALL_SCORING_MODELS) {
 			if(rankModel.equals(Model)){
@@ -46,41 +56,52 @@ public class AppUtility {
 		return false;
 	}
 
+	/**
+	 * Gives scoring model object based on model name passed
+	 * @param model
+	 * @return scoring model object
+	 */
 	public static Similarity getScoringModel(String model) { //CLASSIC, BM25, LM_DIRICHLET, LMJELINEKMERCER
 		Similarity similarity = null;
 		switch (model){
-		case "CLASSIC":
+		case CLASSIC:
 			similarity = new ClassicSimilarity();
 			break;
-		case "BM25":
+		case BM25:
 			similarity = new BM25Similarity();
 			break;
-		case "LM_DIRICHLET":
+		case LMDIRICHLET:
 			similarity = new LMDirichletSimilarity();
 			break;
-		case "LMJELINEKMERCER":
+		case LMJELINEKMERCER:
 			similarity = new LMJelinekMercerSimilarity(0.49f);
 			break;
 		}
 		return similarity;
 	}
 
+	/**
+	 * gives analyzer object based on model name passed
+	 * @param model
+	 * @return analyzer object
+	 * @throws Exception
+	 */
 	public static Analyzer getAnalyzer(String model) throws Exception { //STANDARD, ENGLISH, CUSTOM1, CUSTOM2, CUSTOM3
 		Analyzer analyzer=null;
 		switch (model){
-		case "STANDARD":
+		case STANDARD:
 			analyzer = new StandardAnalyzer(EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
 			break;
-		case "ENGLISH":
+		case ENGLISH:
 			analyzer = new EnglishAnalyzer();
 			break;
-		case "CUSTOM1":
+		case CUSTOM1:
 			analyzer = new MyAnalyzer();
 			break;
-		case "CUSTOM2":
+		case CUSTOM2:
 			analyzer = new MySynonymAnalyzer();
 			break;
-		case "CUSTOM3":
+		case CUSTOM3:
 			analyzer = new CustomAnalyzer_Syn_stp();
 			break;
 		default:

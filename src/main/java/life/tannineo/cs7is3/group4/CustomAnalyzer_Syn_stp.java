@@ -46,7 +46,8 @@ public class CustomAnalyzer_Syn_stp extends StopwordAnalyzerBase{
 		return new TokenStreamComponents(tokenizer, tokenStream);
 	}
 
-	/** generate Synonym Map for country name in text
+	/** 
+	 * Generate Synonym Map for country name in text
 	 * @return Synonym Map
 	 */
 	private SynonymMap generateSynonymMap( ) {
@@ -69,7 +70,8 @@ public class CustomAnalyzer_Syn_stp extends StopwordAnalyzerBase{
 		return synMap;
 	}
 
-	/** generate StopWord List for most commonly used words
+	/** 
+	 * Generate StopWord List for most commonly used words
 	 * @return stopWord List
 	 */
 	private List<String> generateStopWordList()

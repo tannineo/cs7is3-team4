@@ -48,90 +48,97 @@ public class App {
 		
 		if (args.length == 2 && AppUtility.isValidScoringModel(args[0]) && AppUtility.isValidAnalyzer(args[1])) {
 
+			// region 0. prepare and test field
 			mSimilarityModel =  AppUtility.getScoringModel(args[0]);
 			mAnalyzerModel =   AppUtility.getAnalyzer(args[1]);
 			System.out.println(String.format("Ranking model: %s\t Analyzer:%s", mSimilarityModel.toString(), mAnalyzerModel.toString()));
-			
-		}
-		
-		
-		// region 0. prepare and test field
-		Similarity bm25Similarity = mSimilarityModel;
-    
-		Analyzer mCustomAnalyzer_Syn_stp = mAnalyzerModel; /* use mCustomAnalyzer_Syn_stp */
-		// endregion 0
+			// endregion 0
 
-		// region 1 + 2. corpora parsing & indexing
-		//set flag to use old indexes and to save time, toIndex = flag
-		boolean toIndex = false; //true;
-		if (toIndex) {
+			// region 1 + 2. corpora parsing & indexing
+			//set flag to use old indexes and to save time, toIndex = flag
+			boolean toIndex = false; //true;
+			if (toIndex) {
 
-//			IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
-			IndexWriterConfig iwconfig = new IndexWriterConfig(mCustomAnalyzer_Syn_stp); /* use mCustomAnalyzer_Syn_stp */
+//				IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
+				IndexWriterConfig iwconfig = new IndexWriterConfig(mAnalyzerModel);
 
-			iwconfig.setSimilarity(bm25Similarity);
-			Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
-			iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times ???
-			IndexWriter indexWriter = new IndexWriter(indexDir, iwconfig);
+				iwconfig.setSimilarity(mSimilarityModel);
+				Directory indexDir = FSDirectory.open(Paths.get(App.INDEX_PATH));
+				iwconfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // overwrite multiple times ???
+				IndexWriter indexWriter = new IndexWriter(indexDir, iwconfig);
 
-			ArrayList<Document> tempDocArr = new ArrayList<>();
+				ArrayList<Document> tempDocArr = new ArrayList<>();
 
-			for (int i = 0; i < corporaName.length; i++) {
-				String corp = corporaName[i];
-				File folder = new File("../corpora/" + corp);
+				for (int i = 0; i < corporaName.length; i++) {
+					String corp = corporaName[i];
+					File folder = new File("../corpora/" + corp);
 
-				DocumentParser parser;
-				if (i == 0) {
-					parser = new FbisParser();
-				} else if (i == 1) {
-					parser = new Fr94Parser();
-				} else if (i == 2) {
-					parser = new FtParser();
-				} else {
-					parser = new LatimesParser();
-				}
-
-				System.out.println("Parsing " + corp + "...");
-
-				for (File sgm : Objects.requireNonNull(folder.listFiles())) {
-					if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
-						tempDocArr.addAll(parser.toLucDoc(parser.readFile(sgm.getAbsolutePath())));
+					DocumentParser parser;
+					if (i == 0) {
+						parser = new FbisParser();
+					} else if (i == 1) {
+						parser = new Fr94Parser();
+					} else if (i == 2) {
+						parser = new FtParser();
+					} else {
+						parser = new LatimesParser();
 					}
-				}
 
-				indexWriter.addDocuments(tempDocArr);
-				System.out.println("Finished parsing " + corp + ". Docs: " + tempDocArr.size());
-				tempDocArr.clear();
+					System.out.println("Parsing " + corp + "...");
+
+					for (File sgm : Objects.requireNonNull(folder.listFiles())) {
+						if (sgm.isFile() && sgm.getAbsolutePath().endsWith(".sgm")) {
+							tempDocArr.addAll(parser.toLucDoc(parser.readFile(sgm.getAbsolutePath())));
+						}
+					}
+
+					indexWriter.addDocuments(tempDocArr);
+					System.out.println("Finished parsing " + corp + ". Docs: " + tempDocArr.size());
+					tempDocArr.clear();
+				}
+				try {
+					indexWriter.close();
+				} catch (IOException e) {
+					System.out.println("ERROR: when closing the index from the directory!");
+					System.out.println(String.format("ERROR MESSAGE: %s", e.getMessage()));
+				}			
 			}
-			try {
-				indexWriter.close();
-			} catch (IOException e) {
-				System.out.println("ERROR: an error occurred when closing the index from the directory!");
-				System.out.println(String.format("ERROR MESSAGE: %s", e.getMessage()));
-			}			
+			// endregion 1 + 2
+			
+//			// region 3. query parsing
+//			LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
+//			parse_query(mAnalyzerModel, queryLinkedHashMap);
+//			// endregion 3
+//			// region 4. query searching
+//			search_query(mSimilarityModel,queryLinkedHashMap);
+//			// endregion 4
+			
+			//New query parsing and search 
+			// region 3 + 4 . query parsing + searching
+			parse_search_query(mSimilarityModel, mAnalyzerModel); 
+			// endregion 3 + 4
+
+			
+		} else {
+			System.out.println("Rank model or Analyser Unavailable!!....passed arg Scoring= [" + args[0] +"] Analyzer= ["+ args[1]+"]");
+			System.out.println("Available Analysers: "+Arrays.toString(AppUtility.ALL_ANALYZERS));
+			System.out.println("Available Scoring model: "+Arrays.toString(AppUtility.ALL_SCORING_MODELS));
 		}
-		// endregion 1 + 2
 		
-//		// region 3. query parsing
-//		LinkedHashMap<String, Query> queryLinkedHashMap = new LinkedHashMap<>();
-//		parse_query(mCustomAnalyzer_Syn_stp, queryLinkedHashMap);
-//		// endregion 3
-//		// region 4. query searching
-//		search_query(bm25Similarity,queryLinkedHashMap);
-//		// endregion 4
 		
-		//New query parsing and search 
-		//author: Vishal
-		// region 3 +4 . query parsing + searching
-		parse_search_query(bm25Similarity, mCustomAnalyzer_Syn_stp); 
-		// endregion 3 + 4
 
 		long end = System.currentTimeMillis();
 		NumberFormat secFormatter = new DecimalFormat("#0.00000");
 		System.out.println("Program Running time is " + secFormatter.format((end - start) / 1000d) + " seconds");
 	}
 
-	private static void parse_query(Analyzer mCustomAnalyzer_Syn_stp, LinkedHashMap<String, Query> queryLinkedHashMap) throws ParseException {
+	/** 
+	 * Parse query topics
+	 * @param mAnalyzerModel
+	 * @param queryLinkedHashMap
+	 * @throws ParseException
+	 */
+	private static void parse_query(Analyzer mAnalyzerModel, LinkedHashMap<String, Query> queryLinkedHashMap) throws ParseException {
 		ArrayList<DocumentQuery> documentQueries = new CustomQueryParser().readQueries("topics");
 
 		// parameter tuning
@@ -146,7 +153,7 @@ public class App {
 
 
 //		MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mySynonymAnalyzer, boosts);
-		MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mCustomAnalyzer_Syn_stp, boosts); /* use mCustomAnalyzer_Syn_stp */
+		MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mAnalyzerModel, boosts);
 //		multiFieldQueryParser.setAllowLeadingWildcard(true);
 		for (DocumentQuery dq : documentQueries) {
 			System.out.println("Parsing Query ID:" + dq.queryId);
@@ -161,11 +168,17 @@ public class App {
 		System.out.println("Parsed all queries... " + queryLinkedHashMap.entrySet().size() + " in total!");
 	}
 	
-	private static void search_query(BM25Similarity bm25Similarity, LinkedHashMap<String, Query> queryLinkedHashMap) throws IOException {
+	/** 
+	 * Search for query 
+	 * @param mSimilarityModel
+	 * @param queryLinkedHashMap
+	 * @throws IOException
+	 */
+	private static void search_query(Similarity mSimilarityModel, LinkedHashMap<String, Query> queryLinkedHashMap) throws IOException {
 		Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
 		DirectoryReader dirReader = DirectoryReader.open(dirr);
 		IndexSearcher searcher = new IndexSearcher(dirReader);
-		searcher.setSimilarity(bm25Similarity);
+		searcher.setSimilarity(mSimilarityModel);
 
 		ArrayList<String> resultArr = new ArrayList<>();
 
@@ -186,6 +199,10 @@ public class App {
 		generateResult(resultArr);
 		// endregion 5
 	}
+	/**
+	 * @param resultArr
+	 * @throws IOException
+	 */
 	private static void generateResult(ArrayList<String> resultArr) throws IOException {
 		String filename = "search_result_" + new Date().getTime();
 		Path resultPath = Paths.get(filename);
@@ -193,12 +210,19 @@ public class App {
 		System.out.println(filename + " complete!");
 	}
 
-	private static void parse_search_query(Similarity bm25Similarity, Analyzer mCustomAnalyzer_Syn_stp) throws ParseException, IOException {
+	/**
+	 * parse and search for query in indexed data
+	 * @param mSimilarityModel
+	 * @param mAnalyzerModel
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	private static void parse_search_query(Similarity mSimilarityModel, Analyzer mAnalyzerModel) throws ParseException, IOException {
 
 		Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
 		DirectoryReader dirReader = DirectoryReader.open(dirr);
 		IndexSearcher indexSearcher = new IndexSearcher(dirReader);
-		indexSearcher.setSimilarity(bm25Similarity);
+		indexSearcher.setSimilarity(mSimilarityModel);
 
 //		PrintWriter writer = new PrintWriter("new_queryResults", "UTF-8");
 
@@ -209,7 +233,7 @@ public class App {
 		boosts.put(FieldName.HEADLINE.getName(), (float) 0.1);
 		boosts.put(FieldName.TEXT.getName(), (float) 0.9);
 
-		MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mCustomAnalyzer_Syn_stp, boosts); /* use mCustomAnalyzer_Syn_stp */
+		MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mAnalyzerModel, boosts);
 		ArrayList<String> resultArr = new ArrayList<>();
 		
 		for (DocumentQuery dq : documentQueries) {
@@ -294,6 +318,10 @@ public class App {
 	}
 
 
+	/** 
+	 * Closes Index reader to remove lock from directory
+	 * @param dirReader
+	 */
 	private static void closeIndexReader(DirectoryReader dirReader) {
 		try {
 			dirReader.close();
@@ -302,11 +330,5 @@ public class App {
 			System.out.println(String.format("ERROR MESSAGE: %s", e.getMessage()));
 		}
 	}
-
-	private static void closePrintWriter(PrintWriter writer){
-		writer.flush();
-		writer.close();
-	}
-
 
 }
