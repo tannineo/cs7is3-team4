@@ -1,0 +1,30 @@
+\section{Pre-processing on Corpora}
+
+We tried to pre-process the corpora (mainly the given corpora from newspapers) with 2 ways.
+The corpora are first renamed with suffixes \enquote{*.sgm} and the folder structure is re-organized for file filtering purpose.
+
+\subsection{SGML to JSON}
+
+The tool \enquote{osx} from OpenSP\cite{openSP} is an SGML tool converting documents from SGML to XML. The tool, \enquote{osx}, can read the \enquote{*.dtd} files for structure definitions of the file. After getting parsed XML files, we use the script \enquote{hay/xml2json} to parse files from XML to JSON. The reason we want JSON files is that the structures of JSON files are closer to the structures of objects in Java.
+
+But the process produced many useless fields in the parsed files, we finally drop this solution.
+
+\subsection{Jsoup}
+
+Jsoup is a library for processing HTML or other SGML-like standard language written in Java. Elements of the SGML files are identified and texts inside the element can be extracted. For the 4 types of documents, the program parses with these elements identified:
+\vspace{.1cm}
+\begin{itemize}
+    \item \textbf{Foreign Broadcast Information Service(FBIS):} DOCNO, TEXT, PROFILE, DATE, HEADLINE, BYLINE, PUB, PAGE.
+    \item \textbf{Federal Register(FR94):} DOCNO, TEXT, META, PARENT, HEADLINE.
+    \item \textbf{Financial Times Limited(FT):} DOCNO, TEXT, PROFILE, DATE, HEADLINE, BYLINE, PUB, PAGE.
+    \item \textbf{Los Angeles Times(LATIMES):} DOCNO, TEXT, DOCID, DATE, SECTION, LENGTH, HEADLINE, GRAPHIC, TYPE, SUBJECT, BYLINE.
+\end{itemize}
+
+To notice that in case of some elements might be ignored, we pick the texts off from the document one by one and the rest of the content goes into an extra element called \enquote{META}.
+
+\subsection{Jsoup Query Parsing}
+
+A custom query parser is built using Jsoup library in Java to parse the topic file which has 50 query present in it. The various fields from the query files are parsed and stored separately for analyzing the index files. The different content are present in the query file are parsed into separate fields NUM, TITLE, DESCRIPTION, NARRATIVE and converted into lower case letters to make it all uniform in case.
+\vspace{0.2cm}
+
+

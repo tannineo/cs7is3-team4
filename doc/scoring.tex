@@ -1,0 +1,26 @@
+\section{Scoring Models}
+
+Searcher performs query search in the indexer and provides the top 1000 hits of the search result. It is the work of the scorer to provide relevance score for the queried results which we have obtained and marks a score which signifies the click through rate of the user in terms of real search engine. There are various methods to calculate this score and the following were tested:
+
+\subsection{TF-IDF (Classic Similarity)}
+
+This uses the vector space model to calculate the term frequency and then calculate how important that term is in the document retrieved and based on that the score is provided for the texts. For example, the commonly occurring words (ex: the, a) receive very less score in considering complex terms like “judicial”.
+
+\subsection{BM25 Similarity}
+
+This is similar in methodology while comparing with the TF-IDF but since TF-IDF can produce negative scores for the term based on the frequency, this has rectified it by adding a 1 on top of log such that only positive values of the scores is obtained and thus having an equal scale for all the scores making it more reliable.
+
+\subsection{Boolean Similarity}
+
+This is a classic Boolean scorer which provides a positive score if all the terms or selected terms are present in the retrieved file. This is useful in searches where we want both the search terms to be present in the queried document.
+
+\subsection{LMDirichlet Similarity}
+
+This similarity is introduced to have better performance in comparing the documents and getting better results.The formula for this assigns a negative score to documents that contain the term, but with fewer occurrences than predicted by the other scorers and increasing the scoring evaluation.
+
+\subsection{LMJelinekMercer Simialrity}
+
+This similarity is working by including a parameter which can be varied, so as to include the required percentage of query words in the result. This parameter needs to be selected correctly to make the scorer work fine and produce better performance.
+ 
+ \vspace{.5cm}
+

@@ -1,0 +1,214 @@
+%%
+%% This is file `sample-sigconf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%%%
+%% This is file `sample-sigconf.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `sigconf')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-sigconf.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%% The first command in your LaTeX source must be the \documentclass command.
+\documentclass[sigconf]{acmart}
+
+
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\pagestyle{plain} % removes running headers
+
+%%
+%% custom packages
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage[autostyle=true]{csquotes}
+\usepackage{xpatch}
+\usepackage{graphicx}  %%% for including graphics
+\graphicspath{{./images/}}
+\usepackage{url}       %%% for including URLs
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{float}
+%caption size
+\usepackage{caption}
+\captionsetup[figure]{font=small,labelfont=small}
+\captionsetup[table]{font=small,labelfont=small}
+
+
+%Conference
+\acmConference[CS7IS3]{INFORMATION RETRIEVAL AND WEB SEARCH}{April 2020}{Trinity College Dublin, Ireland} 
+\acmYear{2020}
+\copyrightyear{2020}
+\acmPrice{00.00}
+
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+
+
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+%%
+%% The majority of ACM publications use numbered citations and
+%% references.  The command \citestyle{authoryear} switches to the
+%% "author year" style.
+%%
+%% If you are preparing content for an event
+%% sponsored by ACM SIGGRAPH, you must use the "author year" style of
+%% citations and references.
+%% Uncommenting
+%% the next command will enable that style.
+%%\citestyle{acmauthoryear}
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{Information Retrieval Group Report\\Group 4 - InfoSeekers}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+\author{Ashwin Sundareswaran R}
+\email{ramasuba@tcd.ie}
+\affiliation{%
+  \institution{Trinity College Dublin}
+  \streetaddress{College Green}
+  \city{Dublin 2}
+}
+
+\author{Chao Chen}
+\email{chenc1@tcd.ie}
+\affiliation{%
+  \institution{Trinity College Dublin}
+  \streetaddress{College Green}
+  \city{Dublin 2}
+}
+
+\author{Chia Lau}
+\email{LAUCH@tcd.ie}
+\affiliation{%
+  \institution{Trinity College Dublin}
+  \streetaddress{College Green}
+  \city{Dublin 2}
+}
+
+\author{Vishal Kumar}
+\email{kumarv1@tcd.ie}
+\affiliation{%
+ \institution{Trinity College Dublin}
+ \streetaddress{College Green}
+ \city{Dublin 2}
+}
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+\renewcommand{\shortauthors}{Group 4 - InfoSeekers}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+  Information retrieval is an important concept in today’s information world. An efficient search engine helps users to obtain the relevant information even if the query is not properly framed. Lucene is one such library in Java used to index and search the dataset provided as input to it. It has an in-built analyzers object used to index the words and rank it accordingly. Data from four different sources including Financial Times Limited, Federal Register, Foreign Broadcast Information Service, Los Angeles Times were the input corpora for the query to be processed. A separate topic file is selected as a query file and the result of 1000 hits per topic is considered for evaluation. Custom analyzers based on synonyms are built to analyze the indexed data and to query.
+\end{abstract}
+
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{Information Retrieval, Search Engine, Analyzers, Scorers, Lucene, Synonym}
+
+%% A "teaser" image appears between the author and affiliation
+%% information and the body of the document, and typically spans the
+%% page.
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+
+\maketitle
+\vspace{2mm}
+\section{Introduction}
+Information Retrieval is the process of finding the relevant information in a document and presenting the result when a query is made.
+Lucene\cite{lucene} is a library built in java made specifically to implement search engines and provide relevant information to users.
+Data considered for the process of finding the relevance is the collection of different articles from four different news publishers including Financial times limited, Federal Register, Foreign Broadcast Information Service and Los Angeles Times.
+There are articles from various domains including medicine, philosophy, economics, tourism etc and each of the publisher has more than 10 documents containing articles in each of them.
+The articles are published and maintained by National Institute of Standards and Technology(NIST) to make it available for the research community to work on improving the techniques for handling the information retrieval process.
+The data in the corpora is in the form of Standard Generalized Markup Language(SGML) and this is parsed using Jsoup\cite{jsoup}, a library used to parse HTML and URL.Each field in the article is parsed in separate index and the same is stored for analyzing with the provided query.
+A query file is provided and the same is parsed to obtain the separate fields from it which is then queried along the indexed data corpora.A custom analyzer is built which is used to analyze the indexed documents with respect to the provided query.
+The analyzer is built in which custom stop words were made to be removed from the document while querying the same.This list of stop words is chosen based on the trial performed on the process of evaluating with Trec\_Eval\cite{trec_eval}, and the top list is selected which provides the maximum relevancy result.
+Trec\_Eval is maintained by National Institute of Standards and Technology which release the evaluation files  which is considered as gold standard for comparing the performance of the obtained result.
+Moving average precision score is calculated and the goal is to improve the score so that the performance of the search engine is also optimised.
+\vspace{0.2cm}
+\input{preprocessing}
+\input{analyzers}
+\input{scoring}
+\input{evaluation}
+\input{summary}
+
+%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{bibfile}
+
+%%
+%% If your work has an appendix, this is the place to put it.
+\vspace{2cm}
+\appendix
+\input{appendix}
+
+\end{document}
+\endinput
+%%
+%% End of file

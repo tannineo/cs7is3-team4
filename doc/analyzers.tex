@@ -1,0 +1,51 @@
+\section{Analyzers}
+
+In order to index different words of the dataset provided, the important terms need to be picked. This is done by stemming various words into tokens and removing the various stop words and then finding in which documents the tokenized terms are present. Lucene has a separate library comprising the analyzers which performs tokenization operation in the input dataset provided to it. The following different analyzers performs the operation in different ways as follows:
+
+\subsection{Standard Analyzer}
+
+This is a basic analyzer that is capable of handling names, e-mail address etc. It lowercases all the words and then tokenizes them. It also removes common words and punctuation.
+
+\subsection{English Analyzer}
+
+This analyzer is specially built for supporting English language. It uses special filter like English Possessive Filter, Keyword maker filter which makes it powerful compared to other analyzers in tokenizing words in English language.
+
+\subsection{Analyzer using ShingleFilter}
+
+One Lucene filter which looked promising was the Shingle Filter. Given a stream of tokens, e.g.: “To be or not to be”. It would output shingles: “To be”, “be or”, “or not”, “not to”, “to be”.
+
+Arguments to this filter would dictate how many tokens per shingle and if the original tokens (“to”, “be”, etc) would be included in the output.
+
+This sounded promising as the dataset contained queries looking for certain two word combinations. For example, Query 421 looks for “industrial waste” as opposed to “radioactive waste” or “dumping waste”.
+
+Unfortunately, this seems to be a dead end. It would take much more time and memory to index. Furthermore, it did not ultimately help increase the Mean Average Precision(MAP).
+
+\subsection{Custom Analyzers}
+
+Customized analyzers are introduced in this section.
+
+\subsubsection{Customized Analyzer}\hfill
+\newline
+The first customized analyzer (CUSTOM1) is described below.
+
+The processing of the text starts with a StandardTokenizer and then goes through a stack of filters:
+
+\begin{itemize}
+    \item LowerCaseFilter: to lower the cases.
+    \item TrimFilter: to trim whitespace characters.
+    \item EnglishPossessiveFilter: to get rid of possessives (e.g. “it's” to “it”).
+    \item SetKeywordMarkerFilter: to skip the words with a list provided. We define the list manually when going through the queries.
+    \item EnglishMinimalStemFilter: to transform plurals into singulars.
+    \item StopFilter: to remove words with a list of stopwords provided.
+    \item PorterStemFilter: a stemming algorithem provided by Snowball scripts\cite{porterStemmer}.
+\end{itemize}
+
+\subsubsection{Customized Analyzer with Synonyms}\hfill
+\newline
+Based on CUSTOM1, we introduced a new customized analyzer with Synonyms (CUSTOM2). A SynonymTokenFilter is added just before the PorterStemFilter. The SynonymTokenFilter implements a function to generate synonyms from a SynonymMap. The SynonymMap can be considered as a lexicon, we parsed the SynonymMap from a file called “wn\_s.pl” from WordNet\cite{wordnet}. The WordNet version is 2.1 and the file is written in Prolog, containing synonym pairs information. Then the queries are expanded by searching both original texts and their synonyms, and the max count of synonyms from a word is set to 3 in our implementation.
+
+\subsubsection{Graph Filter based Custom Analyzer}\hfill
+\newline
+In progression to customise analyser, we added another analyzer as “CustomAnalyzer\_Syn\_stp” referred as "CUSTOM3" in code. It includes StandardTokenizer\cite{StandardTokenizer} as  main tokeniser, Classic Token Stream and some token filter as Snowball\cite{snowball_filter} stemming algorithm, stop word filter for most commonly used words, and synonym graph filter for country names with word delimiter filter to split words into sub-words to make efficient token graph.
+
+
