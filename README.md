@@ -2,6 +2,26 @@
 
 The group assignment of Team 4 for CS7IS3
 
+- [cs7is3-team4](#cs7is3-team4)
+  - [Quick Result](#quick-result)
+  - [How to](#how-to)
+  - [Implemetation](#implemetation)
+    - [Parsing](#parsing)
+      - [Troubleshooting](#troubleshooting)
+    - [Analyzer and Scorer Chosed](#analyzer-and-scorer-chosed)
+  - [About](#about)
+
+## Quick Result
+
+Quick start with command below.
+
+```text
+$ java -jar -Xms4g -Xmx6g InfoSeekers.jar LMJelinekMercer Custom3
+$ java -jar -Xms4g -Xmx6g InfoSeekers.jar BM25 Custom3
+```
+
+Or check the prepared running result (even quicker!).
+
 ## How to
 
 Download the renamed corpora from [issues/2#issuecomment-600780315](https://github.com/tannineo/cs7is3-team4/issues/2#issuecomment-600780315). Extract the corpora as the `corpora` folder.
@@ -25,14 +45,29 @@ A jar called `InfoSeekers.jar` should appear at the root of the project folder.
 Run the compiled `InfoSeekers.jar` file.
 
 ```text
-$ java -jar -Xms4g -Xmx6g InfoSeekers.jar
+$ java -jar -Xms4g -Xmx6g InfoSeekers.jar SCORER ANALYZER
 ```
+
+Avalable scorers are:
+
+- Classic
+- BM25
+- LMDirichlet
+- LMJelinekMercer
+
+Available analyzers are:
+
+- Standard
+- English
+- Custom1
+- Custom2
+- Custom3
 
 ## Implemetation
 
 ### Parsing
 
-2 approaches to parse the corpora:
+2 approaches to parse the corpora, here is the complex one `:)` :
 
 - `jsoup`: to directly parse sgml (used in java code)
 - `sgml => xml => json`: the way is listed below (not recommended for high cost of time)
@@ -83,9 +118,15 @@ One special file: `./corpora/fr94/fr940328_2.sgm` will cause `awk_split.sh` to t
 
 Delete the first line of this file to make sure the file starts with `<DOC>`
 
-### Indexing
+### Analyzer and Scorer Chosed
 
-### Querying
+There are 3 custom analyzers implemented:
+
+- [MyAnalyzer](src/main/java/life/tannineo/cs7is3/group4/MyAnalyzer.java)
+- [MySynonymAnalyzer](src/main/java/life/tannineo/cs7is3/group4/MySynonymAnalyzer.java)
+- [CustomAnalyzer_Syn_stp](src/main/java/life/tannineo/cs7is3/group4/CustomAnalyzer_Syn_stp.java)
+
+The [CustomAnalyzer_Syn_stp](src/main/java/life/tannineo/cs7is3/group4/CustomAnalyzer_Syn_stp.java) with `BM25`, `LMJelinekMercer` scorer produces the best result.
 
 ## About
 
