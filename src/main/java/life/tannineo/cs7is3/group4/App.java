@@ -19,6 +19,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -42,16 +43,27 @@ public class App {
 
 	public static void main(String args[]) throws Exception {
 		long start = System.currentTimeMillis();
+		Similarity mSimilarityModel = null;
+		Analyzer mAnalyzerModel = null;
+		
+		if (args.length == 2 && AppUtility.isValidScoringModel(args[0]) && AppUtility.isValidAnalyzer(args[1])) {
+
+			mSimilarityModel =  AppUtility.getScoringModel(args[0]);
+			mAnalyzerModel =   AppUtility.getAnalyzer(args[1]);
+			System.out.println(String.format("Ranking model: %s\t Analyzer:%s", mSimilarityModel.toString(), mAnalyzerModel.toString()));
+			
+		}
+		
 		
 		// region 0. prepare and test field
-		BM25Similarity bm25Similarity = new BM25Similarity();
+		Similarity bm25Similarity = mSimilarityModel;
     
-		Analyzer mCustomAnalyzer_Syn_stp = new CustomAnalyzer_Syn_stp(); /* use mCustomAnalyzer_Syn_stp */
+		Analyzer mCustomAnalyzer_Syn_stp = mAnalyzerModel; /* use mCustomAnalyzer_Syn_stp */
 		// endregion 0
 
 		// region 1 + 2. corpora parsing & indexing
 		//set flag to use old indexes and to save time, toIndex = flag
-		boolean toIndex = true;
+		boolean toIndex = false; //true;
 		if (toIndex) {
 
 //			IndexWriterConfig iwconfig = new IndexWriterConfig(myAnalyzer);
@@ -171,21 +183,24 @@ public class App {
 		}
 
 		// region 5. gen results
+		generateResult(resultArr);
+		// endregion 5
+	}
+	private static void generateResult(ArrayList<String> resultArr) throws IOException {
 		String filename = "search_result_" + new Date().getTime();
 		Path resultPath = Paths.get(filename);
 		Files.write(resultPath, resultArr, StandardCharsets.UTF_8);
-
 		System.out.println(filename + " complete!");
-		// endregion 5
 	}
-	private static void parse_search_query(BM25Similarity bm25Similarity, Analyzer mCustomAnalyzer_Syn_stp) throws ParseException, IOException {
+
+	private static void parse_search_query(Similarity bm25Similarity, Analyzer mCustomAnalyzer_Syn_stp) throws ParseException, IOException {
 
 		Directory dirr = FSDirectory.open(Paths.get(App.INDEX_PATH));
 		DirectoryReader dirReader = DirectoryReader.open(dirr);
 		IndexSearcher indexSearcher = new IndexSearcher(dirReader);
 		indexSearcher.setSimilarity(bm25Similarity);
 
-		PrintWriter writer = new PrintWriter("new_queryResults", "UTF-8");
+//		PrintWriter writer = new PrintWriter("new_queryResults", "UTF-8");
 
 		ArrayList<DocumentQuery> documentQueries = new CustomQueryParser().readQueries("topics");
 		HashMap<String, Float> boosts = new HashMap<>();
@@ -195,7 +210,8 @@ public class App {
 		boosts.put(FieldName.TEXT.getName(), (float) 0.9);
 
 		MultiFieldQueryParser multiFieldQueryParser = new MultiFieldQueryParser(FieldName.getAllNamesExceptNonSense(), mCustomAnalyzer_Syn_stp, boosts); /* use mCustomAnalyzer_Syn_stp */
-
+		ArrayList<String> resultArr = new ArrayList<>();
+		
 		for (DocumentQuery dq : documentQueries) {
 			System.out.print("Parsing Query ID:" + dq.queryId + " . ");
 //			System.out.println(dq.title + " " + dq.description + " " + dq.narrative);
@@ -223,13 +239,18 @@ public class App {
 
 				for (int hitIndex = 0; hitIndex < hits.length; hitIndex++) {
 					ScoreDoc hit = hits[hitIndex];
-
-					writer.println(dq.queryId + " 0 " + indexSearcher.doc(hit.doc).get(FieldName.DOCNO.getName()) + " " + hitIndex + " " + hit.score + " 0 ");					
+//					writer.println(dq.queryId + " 0 " + indexSearcher.doc(hit.doc).get(FieldName.DOCNO.getName()) + " " + hitIndex + " " + hit.score + " 0 ");
+					String result = dq.queryId + " 0 " + indexSearcher.doc(hit.doc).get(FieldName.DOCNO.getName()) + " " + hitIndex + " " + hit.score + " 0 ";
+					resultArr.add(result);
 				}            	
 			}
 		}
+		// region 5. gen results
+		generateResult(resultArr);
+		// endregion 5
+		
 		closeIndexReader(dirReader);
-		closePrintWriter(writer);
+//		closePrintWriter(writer);
 		System.out.println("Parsed all queries... " + documentQueries.size() + " in total!");
 		System.out.println("queries executed");
 	}
